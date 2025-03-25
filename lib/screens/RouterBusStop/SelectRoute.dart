@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:busmap/screens/SelectRoute.dart';
+import 'package:busmap/screens/RouterBusStop/SelectRoute.dart';
 import 'package:busmap/Router.dart';
+import 'package:busmap/service/BusRouter.dart';
+import 'package:busmap/models/BusRouter/BusRouteDetail.dart';
+import 'package:busmap/screens/RouterBusStop/DetailBus.dart';
+import 'package:fluro/fluro.dart';
+
+
 void main() {
   runApp(SelectRount());
 }
@@ -21,43 +27,44 @@ class BusSelectRount extends StatefulWidget {
 }
 
 class _BusScreenState extends State<BusSelectRount> {
-  List<Map<String, dynamic>> allRoutes = [
-    {"id": 1, "name": "Metro 1", "route": "Bến Thành - Suối Tiên", "price": "20k VNĐ", "time": "05:00 - 22:00", "favorite": true, "type": "metro"},
-    {"id": 2, "name": "D4", "route": "Vinhomes Grand Park - Bến xe Sài Gòn", "price": "7k VNĐ", "time": "05:00 - 22:00", "favorite": true, "type": "bus"},
-    {"id": 3, "name": "Tuyến xe 01", "route": "Bến Thành - Bến xe Chợ Lớn", "price": "5k VNĐ", "time": "05:00 - 20:15", "favorite": false, "type": "bus"},
-    {"id": 4, "name": "Tuyến xe 03", "route": "Bến Thành - Thạnh Xuân", "price": "6k VNĐ", "time": "04:00 - 20:45", "favorite": true, "type": "bus"},
-    {"id": 5, "name": "Tuyến xe 04", "route": "Bến Thành - Cộng Hòa - An Sương", "price": "6k VNĐ", "time": "05:00 - 20:15", "favorite": false, "type": "bus"},
-    {"id": 6, "name": "Tuyến xe 05", "route": "Chợ Lớn - Biên Hòa", "price": "10k VNĐ", "time": "04:50 - 17:50", "favorite": true, "type": "bus"},
-    {"id": 7, "name": "Tuyến xe 06", "route": "Chợ Lớn - Đại học Nông Lâm", "price": "7k VNĐ", "time": "04:55 - 21:00", "favorite": true, "type": "bus"},
-  ];
-
-  List<Map<String, dynamic>> filteredRoutes = [];
+  List<BusRouteDetail> allRoutes = [];
+  List<BusRouteDetail> filteredRoutes = [];
   bool showFavorites = false;
 
   @override
   void initState() {
     super.initState();
-    filteredRoutes = allRoutes;
+    fetchAllBusRoutes();
   }
 
-  void toggleFavorites() {
-    setState(() {
-      showFavorites = !showFavorites;
-      filteredRoutes = showFavorites
-          ? allRoutes.where((route) => route["favorite"]).toList()
-          : allRoutes;
-    });
+  Future<void> fetchAllBusRoutes() async {
+    List<BusRouteDetail> routes = [];
+    for (int i = 1; i <= 9; i++) {
+      try {
+        var routeDetail = await ApiService().fetchBusRouteDetail(i.toString());
+        routes.add(routeDetail);
+      } catch (e) {
+        print('Lỗi khi lấy dữ liệu tuyến $i: $e');
+      }
+    }
+    if (mounted) {
+      setState(() {
+        allRoutes = routes;
+        filteredRoutes = allRoutes;
+      });
+    }
+  }
+  String extractPrice(String tickets) {
+    RegExp regex = RegExp(r'(\d{1,3}(?:,\d{3})*) VNĐ'); // Lấy giá vé có định dạng số + "VNĐ"
+    Match? match = regex.firstMatch(tickets);
+    return match != null ? match.group(1)! + " VNĐ" : "Không có giá";
   }
 
-  void toggleFavorite(int id) {
-    setState(() {
-      int index = allRoutes.indexWhere((route) => route["id"] == id);
-      allRoutes[index]["favorite"] = !allRoutes[index]["favorite"];
-      filteredRoutes = showFavorites
-          ? allRoutes.where((route) => route["favorite"]).toList()
-          : allRoutes;
-    });
-  }
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -68,17 +75,15 @@ class _BusScreenState extends State<BusSelectRount> {
         backgroundColor: Colors.green,
         leading: IconButton(
         icon: Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context); // Quay lại trang trước nếu có
-          } else {
-            // Nếu không có trang trước, điều hướng về "/home"
-            FluroRouterConfig.router.navigateTo(
-              context, "/home",
-              replace: true, // Xóa trang hiện tại khỏi stack
-            );
-          }
-        },
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              FluroRouterConfig.router.navigateTo(context, "/mapSearch");
+            }
+          },
+
+
         ),
       ),
       body: Column(
@@ -104,7 +109,7 @@ class _BusScreenState extends State<BusSelectRount> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               GestureDetector(
-                onTap: () => setState(() => toggleFavorites()),
+                // onTap: () => setState(() => toggleFavorites()),
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
                   decoration: BoxDecoration(
@@ -116,7 +121,7 @@ class _BusScreenState extends State<BusSelectRount> {
                 ),
               ),
               GestureDetector(
-                onTap: () => setState(() => toggleFavorites()),
+                // onTap: () => setState(() => toggleFavorites()),
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
                   decoration: BoxDecoration(
@@ -142,34 +147,46 @@ class _BusScreenState extends State<BusSelectRount> {
                   margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: ListTile(
                     leading: Icon(
-                      route["type"] == "metro" ? Icons.directions_subway : Icons.directions_bus,
-                      color: route["type"] == "metro" ? Colors.red : Colors.blue,
+                      route.routeId == "metro" ? Icons.directions_subway : Icons.directions_bus,
+                      color: route.routeId == "metro" ? Colors.red : Colors.blue,
                     ),
-                    title: Text(route["name"], style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tuyến xe: ${route.routeId}',  // Hiển thị RouteId trước
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        Text(
+                          route.routeName,  // Hiển thị RouteName phía dưới
+                          style: TextStyle(fontSize: 14, color: Colors.black87),
+                        ),
+                      ],
+                    ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(route["route"]),
                         Row(
                           children: [
                             Icon(Icons.access_time, size: 16, color: Colors.grey),
                             SizedBox(width: 5),
-                            Text(route["time"], style: TextStyle(color: Colors.grey)),
+                            Text(route.operationTime, style: TextStyle(color: Colors.grey)),
                             SizedBox(width: 10),
                             Icon(Icons.attach_money, size: 16, color: Colors.grey),
                             SizedBox(width: 5),
-                            Text(route["price"], style: TextStyle(color: Colors.grey)),
+                            Text(extractPrice(route.tickets), style: TextStyle(color: Colors.grey)),
                           ],
                         ),
                       ],
                     ),
-                    trailing: IconButton(
-                      icon: Icon(
-                        route["favorite"] ? Icons.favorite : Icons.favorite_border,
-                        color: route["favorite"] ? Colors.red : Colors.grey,
-                      ),
-                      onPressed: () => toggleFavorite(route["id"]),
-                    ),
+                    onTap: () {
+                      FluroRouterConfig.router.navigateTo(
+                        context,
+                        "/busDetail/${route.routeId}",
+                        transition: TransitionType.fadeIn, // Hiệu ứng chuyển trang
+                      );
+                    },
+
                   ),
                 );
               },

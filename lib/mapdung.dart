@@ -28,8 +28,8 @@ class _MapScreenState extends State<MapScreen> {
   final String apiKey = "5b3ce3597851110001cf6248e0883d07791c4641899a71f24f933f5d"; // API Key
   List<LatLng> routePoints = [];
 
-  LatLng startPoint = LatLng(10.8498838, 106.7724218); // spk
-  LatLng endPoint = LatLng(10.8452193, 106.7939485); // utc2
+  LatLng startPoint = LatLng(10.7769, 106.7009); // Hồ Chí Minh
+  LatLng endPoint = LatLng(10.7755, 106.6959); // Điểm gần đó
   double _currentZoom = 14.0; // Mức zoom mặc định
 
   @override

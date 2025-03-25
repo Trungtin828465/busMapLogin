@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 _buildFeatureItem(Icons.directions_bus, 'Tra cứu', '/search_bus'),
                 _buildFeatureItem(Icons.route, 'Tìm đường', '/find_route'),
-                _buildFeatureItem(Icons.location_on, 'Trạm gần đây', '/busStop'),
+                _buildFeatureItem(Icons.location_on, 'Trạm gần đây', '/mapSearch'),
                 _buildFeatureItem(Icons.feedback, 'Góp ý', '/feedback'),
                 _buildFeatureItem(Icons.school, 'Student Hub', '/student_hub'),
                 _buildFeatureItem(Icons.business, 'Buýt Doanh nghiệp', '/business_bus'),
@@ -145,7 +145,7 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 40, color: Colors.blue),
+          Icon(icon, size: 40, color: Colors.green),
           SizedBox(height: 8),
           Text(label, textAlign: TextAlign.center),
         ],

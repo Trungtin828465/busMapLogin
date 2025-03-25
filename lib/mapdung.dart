@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() {
   runApp(mapDung());
@@ -30,12 +31,61 @@ class _MapScreenState extends State<MapScreen> {
 
   LatLng startPoint = LatLng(10.7769, 106.7009); // Hồ Chí Minh
   LatLng endPoint = LatLng(10.7755, 106.6959); // Điểm gần đó
-  double _currentZoom = 14.0; // Mức zoom mặc định
+  LatLng? currentPosition; // Vị trí hiện tại của người dùng
+  double _currentZoom = 14.0;
 
   @override
   void initState() {
     super.initState();
-    _getRoute(); // Gọi API để lấy tuyến đường
+    _checkPermissionAndStartTracking(); // Bắt đầu theo dõi vị trí
+    _getRoute(); // Lấy tuyến đường ban đầu
+  }
+
+  // Kiểm tra quyền và bắt đầu theo dõi vị trí
+  Future<void> _checkPermissionAndStartTracking() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Kiểm tra xem dịch vụ định vị có bật không
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Vui lòng bật dịch vụ định vị!")),
+      );
+      return;
+    }
+
+    // Kiểm tra và yêu cầu quyền
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Quyền định vị bị từ chối!")),
+        );
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Quyền định vị bị từ chối vĩnh viễn!")),
+      );
+      return;
+    }
+
+    // Bắt đầu lắng nghe vị trí thời gian thực
+    Geolocator.getPositionStream(
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10, // Cập nhật khi di chuyển 10m
+      ),
+    ).listen((Position position) {
+      setState(() {
+        currentPosition = LatLng(position.latitude, position.longitude);
+        _mapController.move(currentPosition!, _currentZoom); // Cập nhật trung tâm bản đồ
+      });
+    });
   }
 
   Future<void> _getRoute() async {
@@ -67,7 +117,7 @@ class _MapScreenState extends State<MapScreen> {
 
           setState(() {
             routePoints = coordinates
-                .map((point) => LatLng(point[1], point[0])) // Đảo ngược lat/lng
+                .map((point) => LatLng(point[1], point[0]))
                 .toList();
           });
         } else {
@@ -81,7 +131,6 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  // Hàm zoom in
   void _zoomIn() {
     setState(() {
       _currentZoom += 1;
@@ -89,7 +138,6 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  // Hàm zoom out
   void _zoomOut() {
     setState(() {
       _currentZoom -= 1;
@@ -100,13 +148,13 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Vẽ tuyến với OpenRouteService")),
+      appBar: AppBar(title: Text("Theo dõi vị trí thời gian thực")),
       body: Stack(
         children: [
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: startPoint,
+              initialCenter: currentPosition ?? startPoint,
               initialZoom: _currentZoom,
             ),
             children: [
@@ -116,6 +164,13 @@ class _MapScreenState extends State<MapScreen> {
               ),
               MarkerLayer(
                 markers: [
+                  if (currentPosition != null)
+                    Marker(
+                      width: 40.0,
+                      height: 40.0,
+                      point: currentPosition!,
+                      child: Icon(Icons.my_location, color: Colors.blue, size: 40),
+                    ),
                   Marker(
                     width: 40.0,
                     height: 40.0,

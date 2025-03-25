@@ -145,7 +145,7 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 40, color: Colors.green),
+          Icon(icon, size: 35, color: Colors.green),
           SizedBox(height: 8),
           Text(label, textAlign: TextAlign.center),
         ],

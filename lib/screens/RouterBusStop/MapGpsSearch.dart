@@ -370,11 +370,11 @@ class _MapGpsState extends State<MapGpsSearch> {
         _busStopMarkers = busStops.map((busStop) => Marker(
           point: LatLng(busStop.latitude, busStop.longitude),
           width: 30.0,
-          height: 30.0,
-          child: Icon(
+          height: 20.0,
+          child: const Icon(
             Icons.directions_bus,
             color: Colors.green,
-            size: 30,
+            size: 27,
           ),
         )).toList();
       });

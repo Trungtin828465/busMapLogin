@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:busmap/screens/RouterBusStop/SelectRoute.dart';
 import 'package:busmap/Router.dart';
-import 'package:busmap/service/BusRouter.dart';
-import 'package:busmap/models/BusRouter/BusRouteDetail.dart';
+import 'package:busmap/service/BusRouterService.dart';
+import 'package:busmap/models/BusRouterModel/BusRouteDetail.dart';
 import 'package:busmap/screens/RouterBusStop/DetailBus.dart';
 import 'package:fluro/fluro.dart';
 

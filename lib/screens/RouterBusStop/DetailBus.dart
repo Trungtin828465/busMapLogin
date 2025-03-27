@@ -1,7 +1,7 @@
+import 'package:busmap/models/BusRouterModel/BusRouteDetail.dart';
 import 'package:flutter/material.dart';
-import 'package:busmap/screens/MapGps.dart';
-import 'package:busmap/service/BusRouter.dart';
-import 'package:busmap/models/BusRouter/BusRouteDetail.dart';
+import 'package:busmap/screens/Map/MapGps.dart';
+import 'package:busmap/service/BusRouterService.dart';
 
 class BusDetailScreen extends StatefulWidget {
   final String routeId;

@@ -3,8 +3,10 @@ import 'package:busmap/Router.dart';
 import 'screens/HomePage.dart';
 import 'package:busmap/service/http_override.dart'; // Import file override SSL
 import 'dart:io';
-import 'package:busmap/mapdung.dart';
+import 'package:busmap/theme/mapdung.dart';
 import 'screens/RouterBusStop/DetailBus.dart';
+import 'screens/Login/welcome_screen.dart';
+
 
 
 
@@ -21,7 +23,7 @@ class BusMapApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       onGenerateRoute: FluroRouterConfig.router.generator,
-      home: HomePage(),
+      home: WelcomeScreen(),
     );
   }
 }

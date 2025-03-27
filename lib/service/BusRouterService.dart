@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:busmap/models/BusRouter/BusRouteDetail.dart';
-import 'package:busmap/models/BusRouter/BusRouter.dart';
+import 'package:busmap/models/BusRouterModel/BusRouteDetail.dart';
+import 'package:busmap/models/BusRouterModel/BusRouter.dart';
 
 class ApiService {
   static const String apiUrl = 'http://apicms.ebms.vn/businfo';

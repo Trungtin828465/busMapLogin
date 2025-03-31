@@ -11,6 +11,8 @@ import 'package:fluro/fluro.dart';
 import 'package:busmap/screens/HomePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:busmap/service/LoginService.dart';
+import 'package:busmap/screens/Login/forget_passsword_screen.dart';
+
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -138,6 +140,12 @@ class _SignInScreenState extends State<SignInScreen> {
                             ],
                           ),
                           GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const ForgetPasswordScreen()),
+                              );
+                            },
                             child: Text(
                               'Forget password?',
                               style: TextStyle(

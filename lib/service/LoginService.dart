@@ -123,33 +123,44 @@ class ApiServiceLogin {
   }
 
   // Gửi OTP
-  Future<Map<String, dynamic>> sendOtp(String email) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/Send-OTP'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'Email': email}),
-    );
-    return _handleResponse(response);
+  Future<String> sendOtp(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/Send-OTP'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'Email': email}),
+      );
+      return "OTP đã gởi cho $email: ";
+    } on SocketException {
+      throw Exception("Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng.");
+    } on FormatException {
+      throw Exception("Dữ liệu phản hồi không đúng định dạng.");
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
 
-  // Đổi mật khẩu sau khi nhập OTP
-  Future<Map<String, dynamic>> changePassword(
-      String email,
-      String otp,
-      String newPassword,
-      String confirmPassword,
-      ) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/ChangePassword'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'Email': email,
-        'OTP': otp,
-        'NewPassword': newPassword,
-        'ConfirmPassword': confirmPassword,
-      }),
-    );
-    return _handleResponse(response);
+  // Đổi mật khẩu (bao gồm xác nhận OTP)
+  Future<String> changePassword(String email, String otp, String newPassword, String confirmPassword) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/ChangePassword'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'Email': email,
+          'OTP': otp,
+          'NewPassword': newPassword,
+          'ConfirmPassword': confirmPassword,
+        }),
+      );
+      return "Đổi mật khẩu thành công! ";
+    } on SocketException {
+      throw Exception("Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng.");
+    } on FormatException {
+      throw Exception("Dữ liệu phản hồi không đúng định dạng.");
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
 
   // XG
